@@ -1,47 +1,25 @@
 import Link from "next/link";
+import { BoxOfficeList } from "@/components/box-office-list";
+import { demoDates } from "@/lib/contracts/box-office";
+import { getDataMode, koreaToday, yesterdayInKorea } from "@/lib/server/demo-box-office";
+
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
+  let mode: "demo" | "live" | "invalid";
+  try { mode = getDataMode(); } catch { mode = "invalid"; }
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link className="wordmark" href="/" aria-label="박스오피스 인사이트 홈">
-          <span className="brand-icon" aria-hidden="true">B</span>
-          BOX OFFICE <span className="wordmark-light">INSIGHTS</span>
-        </Link>
-        <span className="status"><span aria-hidden="true" />서비스 준비 중</span>
+        <Link className="wordmark" href="/" aria-label="박스오피스 인사이트 홈"><span className="brand-icon" aria-hidden="true">B</span>BOX OFFICE <span className="wordmark-light">INSIGHTS</span></Link>
+        <span className="status"><span aria-hidden="true" />{mode === "demo" ? "DEMO · 가상 영화 데이터" : mode === "live" ? "LIVE · 연결 준비 중" : "데이터 모드 설정 오류"}</span>
       </header>
-
       <main id="main-content">
-        <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">영화를 보는 또 하나의 시선</p>
-          <h1 id="page-title">숫자로 읽는<br />영화의 흐름<span className="title-dot">.</span></h1>
-          <p className="intro-description">날짜별 순위부터 매출과 관객의 변화까지.<br />박스오피스의 흐름을 한곳에서 살펴보세요.</p>
-          <div className="source-tag">DATA SOURCE <span>KOBIS · 영화진흥위원회</span></div>
-        </section>
-
-        <section className="workspace" aria-labelledby="workspace-title">
-          <div className="section-heading">
-            <div><p className="eyebrow">YOUR BOX OFFICE DESK</p><h2 id="workspace-title">박스오피스 대시보드</h2></div>
-            <span className="phase-label">기본 화면</span>
-          </div>
-          <div className="feature-grid">
-            <article className="feature-card">
-              <span className="feature-number">01 / BOX OFFICE</span>
-              <h3>날짜별 박스오피스</h3>
-              <p>일간·주간·주말 순위와 영화별 매출, 관객수를 조회할 수 있도록 준비하고 있습니다.</p>
-              <span className="feature-state">조회 기능 준비 중</span>
-            </article>
-            <article className="feature-card">
-              <span className="feature-number">02 / INSIGHTS</span>
-              <h3>흥행 인사이트</h3>
-              <p>최근 7·14·30일의 추이와 Top 영화를 비교할 수 있도록 준비하고 있습니다.</p>
-              <span className="feature-state">분석 기능 준비 중</span>
-            </article>
-          </div>
-          <p className="data-notice" role="status">아직 박스오피스 데이터가 연결되지 않았습니다.</p>
-        </section>
+        <section className="intro list-intro" aria-labelledby="page-title"><p className="eyebrow">영화를 보는 또 하나의 시선</p><h1 id="page-title">영화의 흐름을 한눈에<span className="title-dot">.</span></h1><p className="intro-description">날짜별 순위부터 매출과 관객의 변화까지, 박스오피스를 살펴보세요.</p></section>
+        {mode === "demo" && <aside className="demo-notice"><strong>DEMO</strong><span>2026.09.07 ~ 09.13의 가상 영화 데이터입니다. 실제 흥행 실적이 아니며 외부 API를 호출하지 않습니다.</span></aside>}
+        <BoxOfficeList initialDate={mode === "demo" ? demoDates.end : yesterdayInKorea()} today={koreaToday()} mode={mode} />
       </main>
-      <footer className="site-footer"><span>BOX OFFICE INSIGHTS</span><span>영화의 순간을, 데이터로.</span></footer>
+      <footer className="site-footer"><span>BOX OFFICE INSIGHTS</span><span>{mode === "demo" ? "가상 데이터로 체험하는 박스오피스" : "KOBIS 연동 준비 중"}</span></footer>
     </div>
   );
 }

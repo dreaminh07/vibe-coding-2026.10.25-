@@ -5,6 +5,7 @@ export default defineConfig({
   ...config,
   webServer: {
     command: "npm run dev -- --port 3100",
+    env: { DATA_MODE: "demo" },
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
     timeout: 120_000,
