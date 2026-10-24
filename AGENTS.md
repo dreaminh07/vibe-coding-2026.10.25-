@@ -39,21 +39,24 @@
 - 유효한 DB 캐시는 재사용하고, 미스·만료 시 KOBIS에서 검증된 결과를 받아 갱신한다. 초기 TTL은 정상 결과 1시간, 정상 빈 응답 5분이다.
 - 오류를 정상 캐시로 저장하거나 기존 캐시의 만료 시각을 연장하지 않는다. 외부 실패를 만료 데이터로 숨기지 않는다. DB 조회 실패와 캐시 미스를 구분한다.
 - 내부 API 응답과 KOBIS fetch의 별도 캐시를 비활성화해 DB 만료 정책을 유지한다. 외부 요청에 타임아웃을 두고 인사이트의 외부 동시 호출은 최대 3개로 제한한다.
-- ARCHITECTURE.md의 JSONB 캐시 제안과 ERD.md의 세 테이블 모델은 저장 방식이 다르다. DB 구현 시 ERD의 정규화 모델을 기준으로 관련 문서를 함께 정합화하고, 두 저장소를 중복 운영하지 않는다.
+- DB 캐시는 ARCHITECTURE.md와 ERD.md의 영화·조회 기간·실적 세 테이블 모델을 따른다. 같은 데이터를 단일 JSONB 캐시 테이블에 중복 저장하지 않는다. DB 구현은 Phase 3에서 검증한다.
 - 배포 전 Vercel Hobby·Supabase Free 및 KOBIS의 당시 조건과 한도를 확인하고, 확인일·공식 근거·예상 사용량·충족 판정을 기록한다. 무료 운영 가능성을 미리 확정하지 않는다.
 
 ## 실행·검증 명령어
 
-작성 시점에는 `package.json`과 애플리케이션 코드가 없어 아래 명령어는 **모두 미정이며 실행 가능한 것으로 간주하지 않는다**. 구현 시 `package.json`의 실제 스크립트를 확인하고 이 표를 갱신한다. 명령어를 문서에 썼다는 이유만으로 검증이 완료되었다고 보고하지 않는다.
+Phase 1에서 아래 스크립트를 구성했다. Node.js 22.13 이상과 npm을 사용하며, 실제 정의는 `package.json`을 기준으로 한다. 명령어 정의와 실행 검증 결과를 구분해서 보고한다.
 
-| 작업 | 도입할 명령어 후보 | 현재 사용 명령어·상태 |
+| 작업 | 사용 명령어 | 조건 |
 | --- | --- | --- |
-| 개발 서버 | `npm run dev` | 미정 — 프로젝트·스크립트 없음 |
-| 프로덕션 빌드 | `npm run build` | 미정 — 프로젝트·스크립트 없음 |
-| 린트 | `npm run lint` | 미정 — 도구·스크립트 없음 |
-| 타입 검사 | `npm run typecheck` | 미정 — TypeScript 설정·스크립트 없음 |
-| 테스트 | `npm run test` | 미정 — 테스트 도구·스크립트 없음 |
-| 프로덕션 서버 실행 | `npm run start` | 미정 — 프로젝트·스크립트 없음 |
+| 의존성 설치 | `npm ci` | 잠금 파일 사용 |
+| 개발 서버 | `npm run dev` | 기본 주소 `http://127.0.0.1:3000` |
+| 프로덕션 빌드 | `npm run build` | 키 없이 기본 화면 빌드 가능 |
+| 린트 | `npm run lint` | ESLint, 경고도 실패 |
+| 타입 검사 | `npm run typecheck` | Next 라우트 타입 생성 후 `tsc --noEmit` |
+| 단위 테스트 | `npm run test` | Vitest, 외부 서비스 없이 실행 |
+| 화면 테스트 | `npm run test:e2e` | 사전 빌드와 `npx playwright install chromium` 필요, 서버 자동 실행·종료 |
+| 개발 화면 테스트 | `npm run test:e2e:dev` | Chromium 필요, 개발 서버 자동 실행·종료 |
+| 프로덕션 서버 실행 | `npm run start` | 사전 빌드 필요 |
 
 - 구현 변경에 맞는 검증을 수행하고 PRD의 관련 AC를 확인한다. 특히 숫자 계산, 상태 구분, 캐시 만료, 일부 날짜 실패와 비밀키 비노출을 검증한다.
 - 없는 스크립트를 실행해 검증했다고 주장하지 않는다. 실행하지 못한 검증은 이유와 함께 `미실행`으로 보고한다.
@@ -77,3 +80,13 @@
 - 완료 보고에는 변경 파일과 목적, 실제 실행한 검증 및 결과, 미실행 검증과 이유, 남은 문제를 필요한 만큼 포함한다. 문서만 변경했다면 실행 테스트 대상이 없음을 명시하고 내용·저장 상태를 확인한다.
 - 문서 간 불일치나 실행 환경 제약은 근거와 영향을 보고한다. 성공 여부를 확인하지 못한 작업은 완료했다고 단정하지 않는다.
 - 사용자 메시지·보고·코드 예시·테스트 출력에도 실제 비밀키를 포함하지 않는다. 리뷰를 위해 키 원문 출력을 요구하지 않는다.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
