@@ -82,7 +82,8 @@
     "type": "daily|weekly|weekend",
     "rangeStart": "YYYY-MM-DD",
     "rangeEnd": "YYYY-MM-DD",
-    "source": "cache|kobis",
+    "source": "fixture|cache|kobis",
+    "collectedAt": "ISO-8601",
     "cachedAt": "ISO-8601|null",
     "expiresAt": "ISO-8601"
   }
@@ -217,7 +218,7 @@
 | KOBIS 계약 | 공식 명세 기준의 일간·주간·주말 매핑, 본문 오류·응답 경로·실제 집계 범위 검증 |
 | DB | Supabase 연결, 세 테이블 마이그레이션, RLS·권한, 저장·JOIN·트랜잭션 구현 |
 | 캐시 | 정상/빈 TTL, 히트·미스·만료, DB 실패 구분, 저장본 대조 구현 |
-| 목록 API | `data`/`meta` 최종 계약과 `source`, 캐시 시각, 서비스 오류 코드 적용 |
+| 목록 API | `data`/`meta` 최종 계약과 `source`, 수집·캐시 시각, 서비스 오류 코드 적용 |
 | 목록 화면 | live 메타데이터와 실제 집계 범위 표시, 실제 오류 코드별 안내 검증 |
 | 인사이트 | `/api/insights`, 일간 캐시 재사용, 7/14/30일 집계, Top 5/10, 보조 지표 전체 구현 |
 | 인사이트 화면 | 매출·관객 차트, 빈 날짜 공백, 데이터 보유 일수, 일부 실패 차단 상태 구현 |

@@ -11,29 +11,29 @@ describe("demo fixtures and contracts", () => {
   it("returns all 7 daily dates with numeric ranks and exact fixture amounts", () => {
     for (let day = 7; day <= 13; day++) {
       const response = getDemoBoxOffice(`2026-09-${String(day).padStart(2, "0")}`, "daily");
-      expect(response.status).toBe("ok");
-      expect(response.items).toHaveLength(5);
-      expect(response.items.map((movie) => movie.rank)).toEqual([1, 2, 3, 4, 5]);
+      expect(response.meta.status).toBe("ok");
+      expect(response.data.items).toHaveLength(5);
+      expect(response.data.items.map((movie) => movie.rank)).toEqual([1, 2, 3, 4, 5]);
     }
-    const first = getDemoBoxOffice("2026-09-07", "daily").items[0];
+    const first = getDemoBoxOffice("2026-09-07", "daily").data.items[0];
     expect(first).toMatchObject({ movieNm: "바다 너머의 우리", salesAmt: "145200000", audiCnt: "14520", audiAcc: "64520" });
-    expect(getDemoBoxOffice("2026-09-13", "daily").items[0].movieNm).toBe("밤의 도서관");
+    expect(getDemoBoxOffice("2026-09-13", "daily").data.items[0].movieNm).toBe("밤의 도서관");
   });
   it("uses weekly and weekend ranges and sums period values rather than accumulated counts", () => {
     const week = getDemoBoxOffice("2026-09-09", "weekly");
-    expect([week.rangeStart, week.rangeEnd]).toEqual(["2026-09-07", "2026-09-13"]);
-    expect(week.items[0]).toMatchObject({ salesAmt: "1310400000", audiCnt: "131040", audiAcc: "181040" });
+    expect([week.meta.rangeStart, week.meta.rangeEnd]).toEqual(["2026-09-07", "2026-09-13"]);
+    expect(week.data.items[0]).toMatchObject({ salesAmt: "1310400000", audiCnt: "131040", audiAcc: "181040" });
     const weekend = getDemoBoxOffice("2026-09-09", "weekend");
-    expect([weekend.rangeStart, weekend.rangeEnd]).toEqual(["2026-09-11", "2026-09-13"]);
-    expect(weekend.items.find((item) => item.movieCd === "DEMO001")?.audiCnt).toBe("64560");
+    expect([weekend.meta.rangeStart, weekend.meta.rangeEnd]).toEqual(["2026-09-11", "2026-09-13"]);
+    expect(weekend.data.items.find((item) => item.movieCd === "DEMO001")?.audiCnt).toBe("64560");
   });
   it.each(["daily", "weekly", "weekend"] as const)("returns normal empty outside sample (%s)", (type) => {
-    expect(getDemoBoxOffice("2026-09-06", type)).toMatchObject({ status: "empty", items: [] });
-    expect(getDemoBoxOffice("2026-09-15", type).status).toBe("empty");
+    expect(getDemoBoxOffice("2026-09-06", type)).toMatchObject({ data: { items: [] }, meta: { status: "empty", source: "fixture" } });
+    expect(getDemoBoxOffice("2026-09-15", type).meta.status).toBe("empty");
     expect(() => getDemoBoxOffice("2026-09-14", type)).toThrow("데이터를 불러오지 못했습니다");
   });
   it("trims partial search and restores the original list", () => {
-    const items = getDemoBoxOffice("2026-09-07", "daily").items;
+    const items = getDemoBoxOffice("2026-09-07", "daily").data.items;
     expect(searchMovies(items, " 바다 ").map((item) => item.movieCd)).toEqual(["DEMO001"]);
     expect(searchMovies(items, "없는 제목")).toEqual([]);
     expect(searchMovies(items, "")).toHaveLength(5);
@@ -62,7 +62,7 @@ describe("demo fixtures and contracts", () => {
     vi.stubGlobal("fetch", fetch);
     vi.stubEnv("DATA_MODE", "demo");
     expect(getDataMode()).toBe("demo");
-    expect(getBoxOffice("2026-09-07", "daily").status).toBe("ok");
+    expect(getBoxOffice("2026-09-07", "daily").meta.status).toBe("ok");
     vi.stubEnv("DATA_MODE", "live");
     expect(() => getBoxOffice("2026-09-07", "daily")).toThrow("live 모드");
     vi.stubEnv("DATA_MODE", "typo");

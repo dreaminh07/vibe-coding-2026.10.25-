@@ -36,6 +36,7 @@ export function parseQuery(params: URLSearchParams, today = koreaToday()) {
 
 type RawItem = Record<"movieCd" | "movieNm" | "rank" | "openDt" | "salesAmt" | "audiCnt" | "salesAcc" | "audiAcc", string>;
 const maximumInteger = 9_223_372_036_854_775_807n;
+const demoCollectedAt = "2026-09-14T09:00:00+09:00";
 
 export function normalizeFixture(raw: RawItem): BoxOfficeItem {
   for (const field of ["rank", "salesAmt", "audiCnt", "salesAcc", "audiAcc"] as const) {
@@ -66,14 +67,28 @@ const movies = [
 
 export function getDemoBoxOffice(date: string, type: PeriodType): BoxOfficeResponse {
   if (date === demoDates.error) throw new BoxOfficeError("DEMO_ERROR", 502, "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
-  const result: BoxOfficeResponse = { status: "empty", mode: "demo", items: [], queryDate: date, type, rangeStart: date, rangeEnd: date };
+  const result: BoxOfficeResponse = {
+    data: { items: [] },
+    meta: {
+      status: "empty",
+      mode: "demo",
+      queryDate: date,
+      type,
+      rangeStart: date,
+      rangeEnd: date,
+      source: "fixture",
+      collectedAt: demoCollectedAt,
+      cachedAt: null,
+      expiresAt: "2026-09-14T09:05:00+09:00",
+    },
+  };
   if (date < demoDates.start || date > demoDates.end) return result;
 
   const selectedDay = Number(date.slice(-2)) - 7;
   const startDay = type === "weekly" ? 0 : type === "weekend" ? 4 : selectedDay;
   const endDay = type === "daily" ? selectedDay : 6;
-  result.rangeStart = `2026-09-${String(7 + startDay).padStart(2, "0")}`;
-  result.rangeEnd = `2026-09-${String(7 + endDay).padStart(2, "0")}`;
+  result.meta.rangeStart = `2026-09-${String(7 + startDay).padStart(2, "0")}`;
+  result.meta.rangeEnd = `2026-09-${String(7 + endDay).padStart(2, "0")}`;
   const rows = movies.map((movie) => {
     let audience = 0n;
     let accumulated = 50_000n;
@@ -91,8 +106,9 @@ export function getDemoBoxOffice(date: string, type: PeriodType): BoxOfficeRespo
   rows.sort((a, b) => BigInt(a.salesAmt) === BigInt(b.salesAmt)
     ? a.movieCd.localeCompare(b.movieCd)
     : BigInt(a.salesAmt) > BigInt(b.salesAmt) ? -1 : 1);
-  result.items = rows.map((row, index) => normalizeFixture({ ...row, rank: String(index + 1) }));
-  result.status = "ok";
+  result.data.items = rows.map((row, index) => normalizeFixture({ ...row, rank: String(index + 1) }));
+  result.meta.status = "ok";
+  result.meta.expiresAt = "2026-09-14T10:00:00+09:00";
   return result;
 }
 

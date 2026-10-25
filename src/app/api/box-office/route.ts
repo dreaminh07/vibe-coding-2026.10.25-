@@ -13,7 +13,9 @@ export async function GET(request: Request) {
     if (mode === "demo") await setTimeout(600);
     return Response.json(getBoxOffice(date, type, mode), { headers });
   } catch (error) {
-    if (error instanceof BoxOfficeError) return Response.json({ status: "error", code: error.code, message: error.message }, { status: error.statusCode, headers });
-    return Response.json({ status: "error", code: "INTERNAL_ERROR", message: "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500, headers });
+    if (error instanceof BoxOfficeError) {
+      return Response.json({ error: { code: error.code, message: error.message, retryable: error.statusCode >= 500 } }, { status: error.statusCode, headers });
+    }
+    return Response.json({ error: { code: "INTERNAL_ERROR", message: "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.", retryable: true } }, { status: 500, headers });
   }
 }

@@ -66,6 +66,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible, .table-scroll:
 .result-summary { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0 0 14px; }
 .result-summary strong { font-weight: 500; color: var(--ink); margin-left: 8px; }
 .range-type { margin-left: 10px; color: var(--accent); }
+.result-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--line); }
+.result-overview > div { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: white; }
+.result-overview span { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; }
+.result-overview strong { font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .table-scroll { overflow-x: auto; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: white; }
 table { border-collapse: collapse; width: 100%; min-width: 800px; font-size: 13px; white-space: nowrap; }
 thead { background: #eff3ef; color: var(--muted); text-align: left; }
@@ -85,6 +89,8 @@ tbody tr:hover { background: #fafcf9; }
 .state-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #eff4f0; color: #597c6e; font-size: 25px; }
 .error-panel { border-color: #e8bdb2; background: #fffaf8; }
 .error-panel .state-icon { background: #fae6df; color: #a7452f; }
+.empty-panel { background: #fbfcfa; }
+.search-empty { background: #f8fbfa; border-color: #bdd4c9; }
 .primary-button { background: var(--accent); border-color: var(--accent); color: white; }
 .primary-button:hover { background: #0c5149; }
 .spinner { width: 30px; height: 30px; border: 3px solid #dbe9e2; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -97,6 +103,7 @@ tbody tr:hover { background: #fafcf9; }
   .filter-bar { flex-wrap: wrap; gap: 18px; padding: 18px; }
   .search-field { flex-basis: 60%; }
   .result-summary { flex-direction: column; gap: 4px; }
+  .result-overview { grid-template-columns: 1fr; }
 }
 @media (max-width: 440px) {
   .filter-field:not(.search-field), .period-filter { flex-basis: 100%; }

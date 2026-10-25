@@ -15,13 +15,21 @@ export interface BoxOfficeItem {
 }
 
 export interface BoxOfficeResponse {
-  status: "ok" | "empty";
-  mode: DataMode;
-  items: BoxOfficeItem[];
-  queryDate: string;
-  type: PeriodType;
-  rangeStart: string;
-  rangeEnd: string;
+  data: {
+    items: BoxOfficeItem[];
+  };
+  meta: {
+    status: "ok" | "empty";
+    mode: DataMode;
+    queryDate: string;
+    type: PeriodType;
+    rangeStart: string;
+    rangeEnd: string;
+    source: "fixture" | "cache" | "kobis";
+    collectedAt: string;
+    cachedAt: string | null;
+    expiresAt: string;
+  };
 }
 
 export const demoDates = {
@@ -37,4 +45,18 @@ export function formatInteger(value: string): string {
 export function searchMovies(items: BoxOfficeItem[], search: string): BoxOfficeItem[] {
   const query = search.trim().toLocaleLowerCase("ko-KR");
   return items.filter((item) => item.movieNm.toLocaleLowerCase("ko-KR").includes(query));
+}
+
+export function formatCollectedAt(value: string): string {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) throw new Error("올바른 수집 시각이 아닙니다.");
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
 }

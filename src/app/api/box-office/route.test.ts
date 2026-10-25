@@ -19,7 +19,14 @@ it("returns success, empty, simulated error and invalid input distinctly without
     const response = await GET(new Request(`http://localhost/api/box-office?date=${date}&type=${type}`));
     expect(response.status).toBe(status);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect((await response.json()).status).toBe(code);
+    const body = await response.json();
+    expect(status === 200 ? body.meta.status : "error").toBe(code);
+    if (status === 200) {
+      expect(body.meta).toMatchObject({ source: "fixture", collectedAt: "2026-09-14T09:00:00+09:00", cachedAt: null });
+      expect(Array.isArray(body.data.items)).toBe(true);
+    } else {
+      expect(body.error).toMatchObject({ retryable: status >= 500 });
+    }
   }
   expect(fetch).not.toHaveBeenCalled();
 });
@@ -29,9 +36,9 @@ it("fails closed for live and unknown modes, defaults to demo when unset", async
     vi.stubEnv("DATA_MODE", mode);
     const response = await GET(new Request("http://localhost/api/box-office?date=2026-09-07&type=daily"));
     expect(response.status).toBe(status);
-    expect((await response.json()).code).toBe(code);
+    expect((await response.json()).error.code).toBe(code);
   }
   vi.stubEnv("DATA_MODE", undefined);
   const response = await GET(new Request("http://localhost/api/box-office?date=2026-09-07&type=daily"));
-  expect((await response.json()).mode).toBe("demo");
+  expect((await response.json()).meta.mode).toBe("demo");
 });

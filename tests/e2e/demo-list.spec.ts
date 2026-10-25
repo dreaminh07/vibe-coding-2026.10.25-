@@ -11,6 +11,9 @@ test("dates, periods and loading change the displayed results", async ({ page })
   });
   await page.goto("/");
   await expect(page.getByRole("table")).toBeVisible();
+  await expect(page.getByLabel("조회 결과 요약")).toContainText("조회 건수조회 성공 · 5편");
+  await expect(page.getByLabel("조회 결과 요약")).toContainText("데이터 출처데모 fixture");
+  await expect(page.getByLabel("조회 결과 요약")).toContainText("수집 시각2026. 09. 14. 09:00");
   await page.getByLabel("조회 날짜").fill("2026-09-07");
   await expect(page.getByRole("heading", { name: "박스오피스 데이터를 불러오는 중입니다." })).toBeVisible();
   await expect(page.getByRole("table")).not.toBeVisible();
@@ -48,7 +51,9 @@ test("September 6 is normal empty for all period types and can recover", async (
   await page.getByLabel("조회 날짜").fill("2026-09-06");
   for (const type of ["일간", "주간", "주말"]) {
     await page.getByRole("button", { name: type, exact: true }).click();
-    await expect(page.getByRole("heading", { name: "제공되는 데이터가 없습니다" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "해당 기간의 데이터가 없습니다" })).toBeVisible();
+    await expect(page.getByText(/조회는 정상적으로 완료됐지만/)).toBeVisible();
+    await expect(page.getByText(/오류가 아니며/)).toBeVisible();
     await expect(page.getByRole("main").getByRole("alert")).not.toBeVisible();
     await expect(page.getByRole("table")).not.toBeVisible();
   }
