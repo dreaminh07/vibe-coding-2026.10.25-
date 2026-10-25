@@ -100,7 +100,7 @@ function parseKobisPayload(payload: unknown, date: string, type: PeriodType, col
   if (movieCodes.size !== items.length) throw new BoxOfficeError("UPSTREAM_INVALID_RESPONSE", 502, "KOBIS 응답 형식을 확인할 수 없습니다.");
   const { rangeStart, rangeEnd } = parseRange(result.showRange);
   const collectedAtIso = collectedAt.toISOString();
-  const expiresAt = new Date(collectedAt.getTime() + (items.length === 0 ? 5 : 60) * 60_000).toISOString();
+  const expiresAt = new Date(collectedAt.getTime() + (items.length === 0 ? 60 : 24 * 60) * 60_000).toISOString();
   return {
     data: { items },
     meta: {

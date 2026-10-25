@@ -29,6 +29,10 @@ export interface BoxOfficeResponse {
     collectedAt: string;
     cachedAt: string | null;
     expiresAt: string;
+    warning?: {
+      code: "CACHE_WRITE_FAILED";
+      message: string;
+    };
   };
 }
 

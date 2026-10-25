@@ -5,6 +5,12 @@ import { demoDates, formatCollectedAt, formatInteger, periodLabels, periodTypes,
 
 type LoadState = { key: string; status: "success"; data: BoxOfficeResponse } | { key: string; status: "error"; message: string };
 const genericError = "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+const errorMessages: Record<string, string> = {
+  CACHE_READ_ERROR: "저장된 데이터를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+  CACHE_VERIFY_ERROR: "저장된 데이터가 원본과 일치하지 않습니다. 잠시 후 다시 시도해 주세요.",
+  UPSTREAM_TIMEOUT: "KOBIS 응답 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.",
+  SERVER_MISCONFIGURED: "서버 설정을 확인하는 중입니다. 잠시 후 다시 시도해 주세요.",
+};
 
 export function BoxOfficeList({ initialDate, today, mode }: { initialDate: string; today: string; mode: string }) {
   const [date, setDate] = useState(initialDate);
@@ -24,11 +30,11 @@ export function BoxOfficeList({ initialDate, today, mode }: { initialDate: strin
         const response = await fetch(`/api/box-office?${new URLSearchParams({ date, type })}`, { signal: controller.signal, cache: "no-store" });
         const data = await response.json();
         if (!response.ok || (data.meta?.status !== "ok" && data.meta?.status !== "empty") || !Array.isArray(data.data?.items)) {
-          throw new Error(data.error?.code === "LIVE_NOT_IMPLEMENTED" ? "live 모드는 아직 준비 중입니다. demo 모드를 사용해 주세요." : genericError);
+          throw new Error(errorMessages[data.error?.code] ?? genericError);
         }
         if (active && generation.current === current) setState({ key: requestKey, status: "success", data });
       } catch (error) {
-        if (active && !controller.signal.aborted && generation.current === current) setState({ key: requestKey, status: "error", message: error instanceof Error && error.message.startsWith("live 모드") ? error.message : genericError });
+        if (active && !controller.signal.aborted && generation.current === current) setState({ key: requestKey, status: "error", message: error instanceof Error ? error.message : genericError });
       }
     }
     void load();
@@ -61,6 +67,7 @@ export function BoxOfficeList({ initialDate, today, mode }: { initialDate: strin
             <div><span>수집 시각</span><strong><time dateTime={data.meta.collectedAt}>{formatCollectedAt(data.meta.collectedAt)}</time></strong></div>
           </div>
           <div className="result-summary"><span>집계 기간 <strong>{data.meta.rangeStart} ~ {data.meta.rangeEnd}</strong><span className="range-type">{periodLabels[data.meta.type]}</span></span><span>기준일 <strong>{data.meta.queryDate}</strong></span></div>
+          {data.meta.warning && <p className="cache-warning" role="status">{data.meta.warning.message}</p>}
           {filtered.length === 0 ? <div className="state-panel search-empty" role="status"><span className="state-icon" aria-hidden="true">⌕</span><h3>검색 결과가 없습니다</h3><p>‘{search.trim()}’에 해당하는 영화가 현재 조회 목록에 없습니다.</p><button type="button" className="primary-button" onClick={() => setSearch("")}>검색어 지우기</button></div> :
             <div className="table-scroll" role="region" aria-label="박스오피스 결과" tabIndex={0}><table><caption className="sr-only">{date} 기준 {periodLabels[type]} 박스오피스 목록. 금액 단위 원, 관객 단위 명.</caption><thead><tr><th scope="col">순위</th><th scope="col">영화명</th><th scope="col">개봉일</th><th scope="col" className="number-cell">매출 (원)</th><th scope="col" className="number-cell">관객수 (명)</th><th scope="col" className="number-cell">누적 관객수 (명)</th></tr></thead><tbody>{filtered.map((movie) => <tr key={movie.movieCd}><td><span className={`rank ${movie.rank <= 3 ? "rank-top" : ""}`}>{movie.rank}</span></td><th scope="row">{movie.movieNm}</th><td className="date-cell">{movie.openDt ?? "-"}</td><td className="number-cell">{formatInteger(movie.salesAmt)}</td><td className="number-cell">{formatInteger(movie.audiCnt)}</td><td className="number-cell muted-cell">{formatInteger(movie.audiAcc)}</td></tr>)}</tbody></table></div>}
           <p className="table-note">매출·관객수는 집계 기간의 값이며, 누적 관객수는 해당 응답 기준의 누적값입니다.</p>

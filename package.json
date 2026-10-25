@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:dev": "playwright test --config playwright.dev.config.ts"
+    "test:e2e:dev": "playwright test --config playwright.dev.config.ts",
+    "verify:data": "node --env-file=.env.local scripts/verify-data.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

@@ -66,6 +66,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible, .table-scroll:
 .result-summary { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0 0 14px; }
 .result-summary strong { font-weight: 500; color: var(--ink); margin-left: 8px; }
 .range-type { margin-left: 10px; color: var(--accent); }
+.cache-warning { margin: 0 0 14px; padding: 11px 14px; border: 1px solid #e8d6aa; border-radius: 6px; background: #fffaf0; color: #725a20; font-size: 12px; line-height: 1.6; }
 .result-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--line); }
 .result-overview > div { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: white; }
 .result-overview span { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; }

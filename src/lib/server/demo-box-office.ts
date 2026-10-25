@@ -2,7 +2,7 @@ import "server-only";
 import { demoDates, periodTypes, type BoxOfficeItem, type BoxOfficeResponse, type DataMode, type PeriodType } from "@/lib/contracts/box-office";
 import { BoxOfficeError } from "@/lib/server/box-office-error";
 import { isDate } from "@/lib/server/box-office-validation";
-import { fetchKobisBoxOffice } from "@/lib/server/kobis";
+import { getLiveBoxOffice } from "@/lib/server/live-box-office";
 
 export function getDataMode(): DataMode {
   const mode = process.env.DATA_MODE ?? "demo";
@@ -106,6 +106,6 @@ export function getDemoBoxOffice(date: string, type: PeriodType): BoxOfficeRespo
 }
 
 export async function getBoxOffice(date: string, type: PeriodType, mode = getDataMode()): Promise<BoxOfficeResponse> {
-  if (mode === "live") return fetchKobisBoxOffice(date, type);
+  if (mode === "live") return getLiveBoxOffice(date, type);
   return getDemoBoxOffice(date, type);
 }
