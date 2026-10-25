@@ -1,9 +1,8 @@
 import "server-only";
 import { demoDates, periodTypes, type BoxOfficeItem, type BoxOfficeResponse, type DataMode, type PeriodType } from "@/lib/contracts/box-office";
-
-export class BoxOfficeError extends Error {
-  constructor(public code: string, public statusCode: number, message: string) { super(message); }
-}
+import { BoxOfficeError } from "@/lib/server/box-office-error";
+import { isDate } from "@/lib/server/box-office-validation";
+import { fetchKobisBoxOffice } from "@/lib/server/kobis";
 
 export function getDataMode(): DataMode {
   const mode = process.env.DATA_MODE ?? "demo";
@@ -17,12 +16,6 @@ export function koreaToday(now = new Date()): string {
 
 export function yesterdayInKorea(now = new Date()): string {
   return new Date(Date.parse(`${koreaToday(now)}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
-}
-
-export function isDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(`${value}T00:00:00Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 export function parseQuery(params: URLSearchParams, today = koreaToday()) {
@@ -112,7 +105,7 @@ export function getDemoBoxOffice(date: string, type: PeriodType): BoxOfficeRespo
   return result;
 }
 
-export function getBoxOffice(date: string, type: PeriodType, mode = getDataMode()): BoxOfficeResponse {
-  if (mode === "live") throw new BoxOfficeError("LIVE_NOT_IMPLEMENTED", 501, "live 모드는 아직 준비 중입니다. demo 모드를 사용해 주세요.");
+export async function getBoxOffice(date: string, type: PeriodType, mode = getDataMode()): Promise<BoxOfficeResponse> {
+  if (mode === "live") return fetchKobisBoxOffice(date, type);
   return getDemoBoxOffice(date, type);
 }

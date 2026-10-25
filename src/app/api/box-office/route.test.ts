@@ -31,8 +31,9 @@ it("returns success, empty, simulated error and invalid input distinctly without
   expect(fetch).not.toHaveBeenCalled();
 });
 
-it("fails closed for live and unknown modes, defaults to demo when unset", async () => {
-  for (const [mode, status, code] of [["live", 501, "LIVE_NOT_IMPLEMENTED"], ["bad", 500, "INVALID_DATA_MODE"]] as const) {
+it("fails closed for missing live configuration and unknown modes, defaults to demo when unset", async () => {
+  vi.stubEnv("KOBIS_API_KEY", "");
+  for (const [mode, status, code] of [["live", 500, "SERVER_MISCONFIGURED"], ["bad", 500, "INVALID_DATA_MODE"]] as const) {
     vi.stubEnv("DATA_MODE", mode);
     const response = await GET(new Request("http://localhost/api/box-office?date=2026-09-07&type=daily"));
     expect(response.status).toBe(status);

@@ -57,14 +57,12 @@ describe("demo fixtures and contracts", () => {
     expect(koreaToday(new Date("2026-09-06T16:00:00Z"))).toBe("2026-09-07");
     expect(yesterdayInKorea(new Date("2026-09-06T16:00:00Z"))).toBe("2026-09-06");
   });
-  it("makes no external fetch in demo or unsupported live mode", () => {
+  it("makes no external fetch in demo mode", async () => {
     const fetch = vi.fn(() => { throw new Error("External call forbidden"); });
     vi.stubGlobal("fetch", fetch);
     vi.stubEnv("DATA_MODE", "demo");
     expect(getDataMode()).toBe("demo");
-    expect(getBoxOffice("2026-09-07", "daily").meta.status).toBe("ok");
-    vi.stubEnv("DATA_MODE", "live");
-    expect(() => getBoxOffice("2026-09-07", "daily")).toThrow("live 모드");
+    expect((await getBoxOffice("2026-09-07", "daily")).meta.status).toBe("ok");
     vi.stubEnv("DATA_MODE", "typo");
     expect(getDataMode).toThrow("DATA_MODE 설정");
     expect(fetch).not.toHaveBeenCalled();
