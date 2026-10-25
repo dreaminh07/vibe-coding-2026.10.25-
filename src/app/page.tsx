@@ -18,7 +18,8 @@ export default function HomePage() {
         <section className="intro list-intro" aria-labelledby="page-title"><p className="eyebrow">영화를 보는 또 하나의 시선</p><h1 id="page-title">영화의 흐름을 한눈에<span className="title-dot">.</span></h1><p className="intro-description">날짜별 순위부터 매출과 관객의 변화까지, 박스오피스를 살펴보세요.</p></section>
         {mode === "demo" && <aside className="demo-notice"><strong>DEMO</strong><span>2026.09.07 ~ 09.13의 가상 영화 데이터입니다. 실제 흥행 실적이 아니며 외부 API를 호출하지 않습니다.</span></aside>}
         <BoxOfficeList initialDate={mode === "demo" ? demoDates.end : yesterdayInKorea()} today={koreaToday()} mode={mode} />
-      </main>
+      <p><Link href="/insights">인사이트 화면 보기 →</Link></p>
+    </main>
       <footer className="site-footer"><span>BOX OFFICE INSIGHTS</span><span>{mode === "demo" ? "가상 데이터로 체험하는 박스오피스" : "KOBIS 연동 준비 중"}</span></footer>
     </div>
   );
